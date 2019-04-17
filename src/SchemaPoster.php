@@ -59,8 +59,6 @@ class SchemaPoster {
     $ch = curl_init();
     $host = getenv('PANTHEON_INDEX_HOST');
     $path = 'sites/self/environments/' . $_ENV['PANTHEON_ENVIRONMENT'] . '/index';
-
-    $client_cert = $_SERVER['HOME'] . '/certs/binding.pem';
     $url = 'https://' . $host . '/' . $path;
 
     $file = fopen($schema, 'r');
@@ -69,13 +67,18 @@ class SchemaPoster {
       CURLOPT_URL => $url,
       CURLOPT_PORT => getenv('PANTHEON_INDEX_PORT'),
       CURLOPT_RETURNTRANSFER => 1,
-      CURLOPT_SSLCERT => $client_cert,
       CURLOPT_HTTPHEADER => array('Content-type:text/xml; charset=utf-8'),
       CURLOPT_PUT => TRUE,
       CURLOPT_BINARYTRANSFER => 1,
       CURLOPT_INFILE => $file,
       CURLOPT_INFILESIZE => filesize($schema),
     );
+
+    $client_cert = $_SERVER['HOME'] . '/certs/binding.pem';
+    if (file_exists($client_cert)) {
+      $opts[CURLOPT_SSLCERT] = $client_cert;
+    }
+
     curl_setopt_array($ch, $opts);
     $response = curl_exec($ch);
     $info = curl_getinfo($ch);

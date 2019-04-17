@@ -15,10 +15,12 @@ class PantheonCurl extends Curl {
    */
   public function createHandle($request, $endpoint) {
     $handler = parent::createHandle($request, $endpoint);
-    if (defined('PANTHEON_ENVIRONMENT')) {
+    if (getenv('PANTHEON_INDEX_HOST')) {
       curl_setopt($handler, CURLOPT_SSL_VERIFYPEER, FALSE);
       $client_cert = $_SERVER['HOME'] . '/certs/binding.pem';
-      curl_setopt($handler, CURLOPT_SSLCERT, $client_cert);
+      if (file_exists($client_cert)) {
+        curl_setopt($handler, CURLOPT_SSLCERT, $client_cert);
+      }
     }
     return $handler;
   }
